@@ -37,24 +37,25 @@ int32_t read_file(const string &filename, vector<sTask> &vboth_machines)
     ifstream file;
     file.open(filename.c_str(), ios_base::in);
     if(!file.good())
-        return -1;
+        return -1;  // -1 to kod bledu
+    //Wczytuje ilosc zadan
+    int32_t number_of_tasks{0};
+    file >> number_of_tasks;
 
-    int32_t number_of_machines{0};
-    file >> number_of_machines;
-
-    for (uint16_t counter{0}; counter < number_of_machines; ++counter)
-    {
+    for (uint16_t counter{0}; counter < number_of_tasks; ++counter)
+    {   //Wczytuje czasy wykonania
         sTask machine1;
         file >> machine1.time1 >> machine1.time2;
+        //Wczytuje nr zadania +1 bo od 0 liczymy
         machine1.nr_of_task = counter + 1;
         vboth_machines.push_back(machine1);
     }
-    return number_of_machines;
+    return number_of_tasks;
 }
-
-void add_from_end(sTask *tab_of_tasks, sTask value, const int32_t number_of_machines)
+//Funkcja dodajaca od konca tablicy
+void add_from_end(sTask *tab_of_tasks, sTask value, const int32_t number_of_tasks)
 {
-    static int32_t position{number_of_machines -1};
+    static int32_t position{number_of_tasks -1};
     if(position >= 0)
     {
         tab_of_tasks[position] = value;
@@ -63,11 +64,11 @@ void add_from_end(sTask *tab_of_tasks, sTask value, const int32_t number_of_mach
     else
         cout << "Wyjechalismy poza dolny zakres tablicy :(" << endl;
 }
-
-void add_from_begin(sTask *tab_of_tasks, sTask value, const int32_t number_of_machines)
+//Funkcja dodajaca od poczatku tablicy
+void add_from_begin(sTask *tab_of_tasks, sTask value, const int32_t number_of_tasks)
 {
     static uint32_t position{0};
-    if(position <= number_of_machines)
+    if(position <= number_of_tasks)
     {
         tab_of_tasks[position] = value;
         ++position;
@@ -75,7 +76,7 @@ void add_from_begin(sTask *tab_of_tasks, sTask value, const int32_t number_of_ma
     else
         cout << "Wyjechalismy poza gorny zakres tablicy :(" << endl;
 }
-
+//Funkcja pomocnicza do wyszukiwania minimalnego czasu
 bool comparator(const sTask& s1, const sTask& s2)
 {
     return s1.min_time < s2.min_time;
@@ -85,41 +86,42 @@ int main()
 {
     vector<sTask>both_machines;
     string filename;
-    int32_t number_of_machines{0};
+    int32_t number_of_tasks{0};
 
     cout << "Podaj nazwe pliku: " << endl;
     getline(cin,filename);
 
-    number_of_machines = read_file(filename, both_machines);
-    if( number_of_machines == -1)
+    number_of_tasks = read_file(filename, both_machines);
+    if( number_of_tasks == -1)
         return -1;
+    //wpisuje do zmiennej pomocniczej mniejszy czas zadania z obu maszyn
     for(auto &i : both_machines)
-        (i.time1 < i.time2) ? i.min_time = i.time1 : i.min_time = i.time2;
+        (i.time1 < i.time2) ? (i.min_time = i.time1) : (i.min_time = i.time2);
+    //Koncowa tablica wedlug prawidlowej kolejnosci
+    sTask *tab_of_tasks = new sTask [number_of_tasks];
 
-    sTask *tab_of_tasks = new sTask [number_of_machines];
-
-    for(uint32_t counter{0}; counter < number_of_machines; ++counter)
-    {
+    for(uint32_t counter{0}; counter < number_of_tasks; ++counter)
+    {   //Najmniejszy element z vectora
         auto result = min_element(begin(both_machines), end(both_machines), comparator);
-
+        //Zmienna przelaczajaca miedzy wpisywaniem od konca a poczatkiem
         static bool is_end{true};
         if(is_end == true)
         {
-            add_from_end(tab_of_tasks, *result, number_of_machines);
+            add_from_end(tab_of_tasks, *result, number_of_tasks);
             cout << "usuwam" << result->min_time << endl;
             both_machines.erase(result);
             is_end = false;
         }
         else
         {
-            add_from_begin(tab_of_tasks, *result, number_of_machines);
+            add_from_begin(tab_of_tasks, *result, number_of_tasks);
             cout << "usuwam" << result->min_time << endl;
             both_machines.erase(result);
             is_end = true;
         }
     }
 
-    for(uint32_t element{0}; element < number_of_machines; ++element)
+    for(uint32_t element{0}; element < number_of_tasks; ++element)
         cout << tab_of_tasks[element].nr_of_task << "   " << tab_of_tasks[element].min_time << endl;
 
     delete []tab_of_tasks;
