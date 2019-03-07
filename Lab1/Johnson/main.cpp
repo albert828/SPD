@@ -59,8 +59,16 @@ int32_t read_file(const string &filename, vector<sTask> &vboth_machines)
     if(!file.good())
         return -1;  // -1 to kod bledu
     //Wczytuje ilosc zadan
+    /*
+    // Format danych wejsciowych:
+    // 3 2
+    // 1 5
+    // 2 5
+    // 2 5
+    */
     int32_t number_of_tasks{0};
-    file >> number_of_tasks;
+    int32_t num_of_machines{0};
+    file >> number_of_tasks >> num_of_machines;
 
     for (uint16_t counter{0}; counter < number_of_tasks; ++counter)
     {   //Wczytuje czasy wykonania
