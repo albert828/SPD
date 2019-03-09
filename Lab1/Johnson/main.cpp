@@ -14,24 +14,29 @@ struct sTask
     uint32_t min_time;
 };
 
-class Permutation {
+class Cmax {
     public:
-    static vector<vector<int>> permute_list(vector<int> origin_list, int low = 0) {
-        vector<vector<int>> list_of_permutions;
+    Cmax() {};
+    ~Cmax() {};
 
-        do {
-            list_of_permutions.push_back(origin_list);
-        } while (next_permutation(origin_list.begin(), origin_list.end()));
+    static int get_cmax(sTask *tasks, int num_of_tasks) {
+        int sum = tasks[0].time1;
+        int tmp_span = 0;
+        for(int i = 1; i < num_of_tasks; i++) {
+            sum += tasks[i].time1;
+            if(tmp_span == 0)
+                tmp_span = tasks[i-1].time2;
 
-        return list_of_permutions;
-    };
-
-    static void print_permuted_list(vector <vector<int>> list) {
-        for(auto i : list) {
-            for(auto j : i) cout << j << " ";
-            cout << endl;
+            if(tmp_span <= tasks[i].time1) {
+                if(num_of_tasks - 1 != i)
+                    tmp_span = 0;
+            } else {
+                tmp_span = tmp_span + tasks[i].time2 - tasks[i].time1;
+            }
         }
-    };
+        sum += tmp_span;
+        return sum;
+    }
 };
 
 /*
@@ -112,13 +117,6 @@ bool comparator(const sTask& s1, const sTask& s2)
 
 int main()
 {
-    // vector <int> list;
-    // vector <vector<int>> list1;
-    // list.push_back(1);
-    // list.push_back(3);
-    // list.push_back(5);
-    // list1 = Permutation::permute_list(list);
-    // Permutation::print_permuted_list(list1);
 
     vector<sTask>both_machines;
     string filename;
@@ -160,6 +158,7 @@ int main()
     for(uint32_t element{0}; element < number_of_tasks; ++element)
         cout << tab_of_tasks[element].nr_of_task << "   " << tab_of_tasks[element].min_time << endl;
 
+    cout << "Sum:" << Cmax::get_cmax(tab_of_tasks, number_of_tasks) << endl;
     delete []tab_of_tasks;
     tab_of_tasks = nullptr;
 
