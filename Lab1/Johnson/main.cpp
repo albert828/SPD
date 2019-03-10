@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <stdint.h>
 
 using namespace std;
 
@@ -57,7 +58,7 @@ linki: https://en.wikipedia.org/wiki/Johnson%27s_rule
 Drugie chyba prostsze wi�c to zrobi�
 */
 
-int32_t read_file(const string &filename, vector<sTask> &vboth_machines)
+int32_t read_file(const string &filename, vector<vector<uint32_t>> &vmachines)
 {
     ifstream file;
     file.open(filename.c_str(), ios_base::in);
@@ -75,16 +76,21 @@ int32_t read_file(const string &filename, vector<sTask> &vboth_machines)
     int32_t num_of_machines{0};
     file >> number_of_tasks >> num_of_machines;
 
+    vmachines.reserve(num_of_machines);
+
+    //vmachines[1].push_back(2);
     for (uint16_t counter{0}; counter < number_of_tasks; ++counter)
     {   //Wczytuje czasy wykonania
-        sTask machine1;
-        file >> machine1.time1 >> machine1.time2;
-        //Wczytuje nr zadania +1 bo od 0 liczymy
-        machine1.nr_of_task = counter + 1;
-        vboth_machines.push_back(machine1);
+        uint32_t value{0};
+        for(uint16_t i{0}; i < num_of_machines; ++i)
+            {
+                file >> value;
+                vmachines[i].push_back(value);
+            }
     }
     return number_of_tasks;
 }
+/*
 //Funkcja dodajaca od konca tablicy
 void add_from_end(sTask *tab_of_tasks, sTask value, const int32_t number_of_tasks)
 {
@@ -114,20 +120,21 @@ bool comparator(const sTask& s1, const sTask& s2)
 {
     return s1.min_time < s2.min_time;
 }
-
+*/
 int main()
 {
 
-    vector<sTask>both_machines;
+    vector<vector<uint32_t>> vmachines;
     string filename;
     int32_t number_of_tasks{0};
 
     cout << "Podaj nazwe pliku: " << endl;
     getline(cin,filename);
 
-    number_of_tasks = read_file(filename, both_machines);
+    number_of_tasks = read_file(filename, vmachines);
     if( number_of_tasks == -1)
         return -1;
+        /*
     //wpisuje do zmiennej pomocniczej mniejszy czas zadania z obu maszyn
     for(auto &i : both_machines)
         (i.time1 < i.time2) ? (i.min_time = i.time1) : (i.min_time = i.time2);
@@ -161,6 +168,6 @@ int main()
     cout << "Sum:" << Cmax::get_cmax(tab_of_tasks, number_of_tasks) << endl;
     delete []tab_of_tasks;
     tab_of_tasks = nullptr;
-
+    */
     return 0;
 }
