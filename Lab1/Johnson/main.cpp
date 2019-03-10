@@ -6,17 +6,9 @@
 #include <stdint.h>
 
 using namespace std;
-
-struct sTask
-{
-    uint32_t nr_of_task;
-    uint32_t time1;
-    uint32_t time2;
-    uint32_t min_time;
-};
-
+/*
 class Cmax {
-    public:
+public:
     Cmax() {};
     ~Cmax() {};
 
@@ -39,6 +31,7 @@ class Cmax {
         return sum;
     }
 };
+*/
 
 /*
 ####Algorytm Johnsona####
@@ -58,8 +51,8 @@ linki: https://en.wikipedia.org/wiki/Johnson%27s_rule
 Drugie chyba prostsze wi�c to zrobi�
 */
 
-int32_t read_file(const string &filename, vector<vector<uint32_t>> &vmachines)
-{
+
+int32_t read_file(const string &filename, vector<vector<uint32_t>> &vmachines) {
     ifstream file;
     file.open(filename.c_str(), ios_base::in);
     if(!file.good())
@@ -76,55 +69,60 @@ int32_t read_file(const string &filename, vector<vector<uint32_t>> &vmachines)
     int32_t num_of_machines{0};
     file >> number_of_tasks >> num_of_machines;
 
-    vmachines.reserve(num_of_machines);
-
-    //vmachines[1].push_back(2);
-    for (uint16_t counter{0}; counter < number_of_tasks; ++counter)
+    vmachines.resize(num_of_machines, vector<uint32_t>(number_of_tasks));
+    for (uint16_t task{0}; task < number_of_tasks; ++task)
     {   //Wczytuje czasy wykonania
         uint32_t value{0};
-        for(uint16_t i{0}; i < num_of_machines; ++i)
-            {
-                file >> value;
-                vmachines[i].push_back(value);
-            }
+        for(uint16_t list{0}; list < num_of_machines; ++list)
+        {
+            file >> value;
+            vmachines[list][task] = value;
+        }
     }
     return number_of_tasks;
 }
-/*
+
+uint32_t find_min_value(vector<vector<uint32_t>> &vmachines)
+{
+    vector<uint32_t>::iterator min1, min2;
+    uint32_t dist;
+    min1 = min_element(begin(vmachines[0]), end(vmachines[0]));
+    min2 = min_element(begin(vmachines[1]), end(vmachines[1]));
+    //cout << *min1 << " " << *min2 << endl;
+    (*min1 < *min2) ? (dist = distance(begin(vmachines[0]), min1)) : dist = distance(begin(vmachines[1]),min2);
+    //cout << dist << endl;
+    return dist;
+}
+
 //Funkcja dodajaca od konca tablicy
-void add_from_end(sTask *tab_of_tasks, sTask value, const int32_t number_of_tasks)
+void add_from_end(vector<uint32_t> &sorted_nr_tasks, const uint32_t value, const int32_t number_of_tasks)
 {
     static int32_t position{number_of_tasks -1};
     if(position >= 0)
     {
-        tab_of_tasks[position] = value;
+       sorted_nr_tasks[position] = value;
         --position;
     }
     else
         cout << "Wyjechalismy poza dolny zakres tablicy :(" << endl;
 }
 //Funkcja dodajaca od poczatku tablicy
-void add_from_begin(sTask *tab_of_tasks, sTask value, const int32_t number_of_tasks)
+void add_from_begin(vector<uint32_t> &sorted_nr_tasks, const uint32_t value, const int32_t number_of_tasks)
 {
     static uint32_t position{0};
     if(position <= number_of_tasks)
     {
-        tab_of_tasks[position] = value;
+        sorted_nr_tasks[position] = value;
         ++position;
     }
     else
         cout << "Wyjechalismy poza gorny zakres tablicy :(" << endl;
 }
-//Funkcja pomocnicza do wyszukiwania minimalnego czasu
-bool comparator(const sTask& s1, const sTask& s2)
-{
-    return s1.min_time < s2.min_time;
-}
-*/
+
 int main()
 {
 
-    vector<vector<uint32_t>> vmachines;
+    vector<vector<uint32_t>> vmachines, vmachines_copy;
     string filename;
     int32_t number_of_tasks{0};
 
@@ -132,42 +130,51 @@ int main()
     getline(cin,filename);
 
     number_of_tasks = read_file(filename, vmachines);
+    vmachines_copy = vmachines;
     if( number_of_tasks == -1)
         return -1;
-        /*
-    //wpisuje do zmiennej pomocniczej mniejszy czas zadania z obu maszyn
-    for(auto &i : both_machines)
-        (i.time1 < i.time2) ? (i.min_time = i.time1) : (i.min_time = i.time2);
-    //Koncowa tablica wedlug prawidlowej kolejnosci
-    sTask *tab_of_tasks = new sTask [number_of_tasks];
+    /*
+    for(auto &i : vmachines)
+    {
+        for(auto &j : i)
+            cout << j << ",";
+        cout << endl;
+    }
+    */
 
-    for(uint32_t counter{0}; counter < number_of_tasks; ++counter)
-    {   //Najmniejszy element z vectora
-        auto result = min_element(begin(both_machines), end(both_machines), comparator);
-        //Zmienna przelaczajaca miedzy wpisywaniem od konca a poczatkiem
+    vector<uint32_t> sorted_nr_tasks(number_of_tasks);
+    for(uint32_t i{0}; i < number_of_tasks; ++i)
+    {
+        uint32_t dist{0};
+        dist = find_min_value(vmachines_copy);
+        //cout << dist << " ";
+        for(auto &list : vmachines_copy)
+            list[dist] = UINT32_MAX;
+/*
+        for(const auto &list : vmachines)
+        {
+            for(const auto task : list)
+                cout << task << ",";
+            cout << endl;
+        }
+*/
         static bool is_end{true};
         if(is_end == true)
         {
-            add_from_end(tab_of_tasks, *result, number_of_tasks);
-            cout << "usuwam" << result->min_time << endl;
-            both_machines.erase(result);
+            add_from_end(sorted_nr_tasks, dist, number_of_tasks);
             is_end = false;
         }
         else
         {
-            add_from_begin(tab_of_tasks, *result, number_of_tasks);
-            cout << "usuwam" << result->min_time << endl;
-            both_machines.erase(result);
+            add_from_begin(sorted_nr_tasks, dist, number_of_tasks);
             is_end = true;
         }
     }
 
-    for(uint32_t element{0}; element < number_of_tasks; ++element)
-        cout << tab_of_tasks[element].nr_of_task << "   " << tab_of_tasks[element].min_time << endl;
+for(auto i : sorted_nr_tasks)
+    cout << (i + 1) << " " << endl;
 
-    cout << "Sum:" << Cmax::get_cmax(tab_of_tasks, number_of_tasks) << endl;
-    delete []tab_of_tasks;
-    tab_of_tasks = nullptr;
-    */
+//cout << "Sum:" << Cmax::get_cmax(tab_of_tasks, number_of_tasks) << endl;
+
     return 0;
 }
