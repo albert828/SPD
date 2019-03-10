@@ -6,32 +6,35 @@
 #include <stdint.h>
 
 using namespace std;
-/*
+
 class Cmax {
 public:
     Cmax() {};
     ~Cmax() {};
 
-    static int get_cmax(sTask *tasks, int num_of_tasks) {
-        int sum = tasks[0].time1;
-        int tmp_span = 0;
-        for(int i = 1; i < num_of_tasks; i++) {
-            sum += tasks[i].time1;
-            if(tmp_span == 0)
-                tmp_span = tasks[i-1].time2;
+    static int get_cmax(vector<vector<uint32_t>> vmachines, vector<uint32_t> sorted) {
+        int sum = vmachines[0][sorted[0]];
+        vector<uint32_t> tmp_span;
+        for(auto _ : vmachines) {
+            tmp_span.push_back(0);
+        }
+        for(vector<int>::size_type i = 1; i != sorted.size(); i++) {
+            sum += vmachines[0][sorted[i]];
+            if(tmp_span[0] == 0)
+                tmp_span[0] = vmachines[1][sorted[i-1]];
 
-            if(tmp_span <= tasks[i].time1) {
-                if(num_of_tasks - 1 != i)
-                    tmp_span = 0;
+            if(tmp_span[0] <= vmachines[0][sorted[i]]) {
+                tmp_span[0] = 0;
+                if(sorted.size() - 1 == i)
+                    tmp_span[0] = vmachines[1][sorted[i]];
             } else {
-                tmp_span = tmp_span + tasks[i].time2 - tasks[i].time1;
+                tmp_span[0] = tmp_span[0] + vmachines[1][sorted[i]] - vmachines[0][sorted[i]];
             }
         }
-        sum += tmp_span;
+        sum = sum + tmp_span[0];
         return sum;
     }
 };
-*/
 
 /*
 ####Algorytm Johnsona####
@@ -171,10 +174,10 @@ int main()
         }
     }
 
-for(auto i : sorted_nr_tasks)
-    cout << (i + 1) << " " << endl;
+    for(auto i : sorted_nr_tasks)
+        cout << (i + 1) << " " << vmachines[0][i] << " " << vmachines[1][i] << endl;
 
-//cout << "Sum:" << Cmax::get_cmax(tab_of_tasks, number_of_tasks) << endl;
+    cout << "Sum:" << Cmax::get_cmax(vmachines, sorted_nr_tasks) << endl;
 
     return 0;
 }
