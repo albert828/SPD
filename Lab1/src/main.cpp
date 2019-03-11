@@ -4,37 +4,11 @@
 #include <vector>
 #include <algorithm>
 #include <stdint.h>
+#include "permutation.hh"
+#include "cmax.hh"
 
 using namespace std;
 
-class Cmax {
-public:
-    Cmax() {};
-    ~Cmax() {};
-
-    static int get_cmax(vector<vector<uint32_t>> vmachines, vector<uint32_t> sorted) {
-        int sum = vmachines[0][sorted[0]];
-        vector<uint32_t> tmp_span;
-        for(auto _ : vmachines) {
-            tmp_span.push_back(0);
-        }
-        for(vector<int>::size_type i = 1; i != sorted.size(); i++) {
-            sum += vmachines[0][sorted[i]];
-            if(tmp_span[0] == 0)
-                tmp_span[0] = vmachines[1][sorted[i-1]];
-
-            if(tmp_span[0] <= vmachines[0][sorted[i]]) {
-                tmp_span[0] = 0;
-                if(sorted.size() - 1 == i)
-                    tmp_span[0] = vmachines[1][sorted[i]];
-            } else {
-                tmp_span[0] = tmp_span[0] + vmachines[1][sorted[i]] - vmachines[0][sorted[i]];
-            }
-        }
-        sum = sum + tmp_span[0];
-        return sum;
-    }
-};
 
 /*
 ####Algorytm Johnsona####
@@ -174,10 +148,14 @@ int main()
         }
     }
 
-    for(auto i : sorted_nr_tasks)
-        cout << (i + 1) << " " << vmachines[0][i] << " " << vmachines[1][i] << endl;
+    vector<uint32_t> tasks;
+    for(int i = 0; i < number_of_tasks;i++) tasks.push_back(i);
+    vector <vector<uint32_t>> all_permutation = Permutation::permute_list(tasks);
+    Permutation::print_permuted_list_with_cmax(all_permutation, vmachines);
 
-    cout << "Sum:" << Cmax::get_cmax(vmachines, sorted_nr_tasks) << endl;
+    cout << "Johnson:" << endl;
+    for(auto i : sorted_nr_tasks) cout << (i + 1) << " ";
+    cout << endl;
 
     return 0;
 }
