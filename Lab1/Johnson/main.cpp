@@ -50,13 +50,22 @@ linki: https://en.wikipedia.org/wiki/Johnson%27s_rule
 
 Drugie chyba prostsze wi�c to zrobi�
 */
+struct sTask_Info
+{
+    uint32_t number_of_machines;
+    int32_t number_of_tasks;
+};
 
 
-int32_t read_file(const string &filename, vector<vector<uint32_t>> &vmachines) {
+sTask_Info read_file(const string &filename, vector<vector<uint32_t>> &vmachines) {
+    sTask_Info info;
     ifstream file;
     file.open(filename.c_str(), ios_base::in);
     if(!file.good())
-        return -1;  // -1 to kod bledu
+    {
+        info.number_of_tasks = -1;
+        return info;  // -1 to kod bledu
+    }
     //Wczytuje ilosc zadan
     /*
     // Format danych wejsciowych:
@@ -65,21 +74,20 @@ int32_t read_file(const string &filename, vector<vector<uint32_t>> &vmachines) {
     // 2 5
     // 2 5
     */
-    int32_t number_of_tasks{0};
-    int32_t num_of_machines{0};
-    file >> number_of_tasks >> num_of_machines;
+    //sTask_Info info;
+    file >> info.number_of_tasks >> info.number_of_machines;
 
-    vmachines.resize(num_of_machines, vector<uint32_t>(number_of_tasks));
-    for (uint16_t task{0}; task < number_of_tasks; ++task)
+    vmachines.resize(info.number_of_machines, vector<uint32_t>(info.number_of_tasks));
+    for (uint16_t task{0}; task < info.number_of_tasks; ++task)
     {   //Wczytuje czasy wykonania
         uint32_t value{0};
-        for(uint16_t list{0}; list < num_of_machines; ++list)
+        for(uint16_t list{0}; list < info.number_of_machines; ++list)
         {
             file >> value;
             vmachines[list][task] = value;
         }
     }
-    return number_of_tasks;
+    return info;
 }
 
 uint32_t find_min_value(vector<vector<uint32_t>> &vmachines)
@@ -100,7 +108,7 @@ void add_from_end(vector<uint32_t> &sorted_nr_tasks, const uint32_t value, const
     static int32_t position{number_of_tasks -1};
     if(position >= 0)
     {
-       sorted_nr_tasks[position] = value;
+        sorted_nr_tasks[position] = value;
         --position;
     }
     else
@@ -118,21 +126,39 @@ void add_from_begin(vector<uint32_t> &sorted_nr_tasks, const uint32_t value, con
     else
         cout << "Wyjechalismy poza gorny zakres tablicy :(" << endl;
 }
+void connect_vectors(const vector<vector<uint32_t>> &vmachines, vector<vector<uint32_t>> &vmachines_connected, const sTask_Info &info)
+{
+    if(info.number_of_machines == 2)
+        vmachines_connected = vmachines;
+    else if(info.number_of_machines == 3)
+    {
+        for(uint32_t task{0}; task < info.number_of_tasks; ++task)
+        {
+            vmachines_connected[0][task] = (vmachines[0][task] + vmachines[1][task]);
+            vmachines_connected[1][task] = (vmachines[1][task] + vmachines[2][task]);
+        }
+    }
+    else
+        cout << "Niepoprawna ilosc maszyn" << endl;
+}
 
 int main()
 {
 
-    vector<vector<uint32_t>> vmachines, vmachines_copy;
+    vector<vector<uint32_t>> vmachines, vmachines_copy, vmachines_connected;
     string filename;
-    int32_t number_of_tasks{0};
+    sTask_Info info;
 
     cout << "Podaj nazwe pliku: " << endl;
     getline(cin,filename);
 
-    number_of_tasks = read_file(filename, vmachines);
-    vmachines_copy = vmachines;
-    if( number_of_tasks == -1)
+    info = read_file(filename, vmachines);
+    if( info.number_of_tasks == -1)
         return -1;
+    vmachines_copy = vmachines;
+    vmachines_connected.resize(2,vector<uint32_t>(info.number_of_tasks));
+    connect_vectors(vmachines, vmachines_connected, info);
+    vmachines_copy = vmachines_connected;
     /*
     for(auto &i : vmachines)
     {
@@ -142,8 +168,8 @@ int main()
     }
     */
 
-    vector<uint32_t> sorted_nr_tasks(number_of_tasks);
-    for(uint32_t i{0}; i < number_of_tasks; ++i)
+    vector<uint32_t> sorted_nr_tasks(info.number_of_tasks);
+    for(uint32_t i{0}; i < info.number_of_tasks; ++i)
     {
         uint32_t dist{0};
         dist = find_min_value(vmachines_copy);
@@ -161,19 +187,25 @@ int main()
         static bool is_end{true};
         if(is_end == true)
         {
-            add_from_end(sorted_nr_tasks, dist, number_of_tasks);
+            add_from_end(sorted_nr_tasks, dist, info.number_of_tasks);
             is_end = false;
         }
         else
         {
-            add_from_begin(sorted_nr_tasks, dist, number_of_tasks);
+            add_from_begin(sorted_nr_tasks, dist, info.number_of_tasks);
             is_end = true;
         }
     }
-
-for(auto i : sorted_nr_tasks)
-    cout << (i + 1) << " " << endl;
-
+/*
+    for(auto i : vmachines_connected)
+    {
+        for(auto j : i)
+            cout << (j) << " ";
+        cout << endl;
+    }
+*/
+    for(auto i : sorted_nr_tasks)
+        cout << (i + 1) << endl;
 //cout << "Sum:" << Cmax::get_cmax(tab_of_tasks, number_of_tasks) << endl;
 
     return 0;
