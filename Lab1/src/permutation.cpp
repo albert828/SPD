@@ -23,8 +23,13 @@ void Permutation::print_permuted_list(vector <vector<uint32_t>> permutation_list
 }
 
 void Permutation::print_permuted_list_with_cmax(vector <vector<uint32_t>> permutation_list, vector <vector<uint32_t>> vmachines) {
+    cout << "+-----------------------------+" << endl;
+    cout << "| Order       | Cmax" << endl;
     for(auto i : permutation_list) {
+        cout << "+-----------------------------+" << endl;
+        cout << "| ";
         for(auto j : i) cout << j+1 << " ";
-        cout << " Cmax: " << Cmax::get_cmax(vmachines, i) << endl;
+        cout << "    |  " << Cmax::get_cmax(vmachines, i) << endl;
     }
+    cout << "+-----------------------------+" << endl;
 }
