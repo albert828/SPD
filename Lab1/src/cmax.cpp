@@ -18,5 +18,6 @@ int Cmax::get_cmax(vector<vector<uint32_t>> vmachines, vector<uint32_t> sorted) 
     for(vector<int>::size_type i = 0; i != vmachines.size(); i++) {
         if(sum[i] > max) max=sum[i];
     }
-    return max;
+    // return ma#include "cmax.hh"x;
+    return sum.back();
 }
