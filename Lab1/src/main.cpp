@@ -6,7 +6,6 @@
 #include <stdint.h>
 #include "permutation.hh"
 #include "cmax.hh"
-#include "utils.hh"
 
 using namespace std;
 
