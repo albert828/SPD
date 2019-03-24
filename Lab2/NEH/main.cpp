@@ -39,7 +39,7 @@ int get_cmax(vector<vector<uint32_t>> vmachines, vector<uint32_t> sorted) {
     return sum.back();
 }
 
-int my_get_cmax(vector<vector<uint32_t>> vmachines) {
+int get_cmax(vector<vector<uint32_t>> vmachines) {
     vector<int> sum;
     for(vector<int>::size_type i = 0; i != vmachines[0].size(); i++) {
         sum.push_back(0);
@@ -52,6 +52,64 @@ int my_get_cmax(vector<vector<uint32_t>> vmachines) {
         }
     }
     return sum.back();
+}
+
+vector<vector<uint32_t>> slice(vector<vector<uint32_t>>  v, int start=0, int end=-1) {
+    int oldlen = v.size();
+    int newlen;
+
+    if (end == -1 or end >= oldlen){
+        newlen = oldlen-start;
+    } else {
+        newlen = end-start;
+    }
+
+    vector<vector<uint32_t>> nv(newlen);
+
+    for (int i=0; i<newlen; i++) {
+        nv[i] = v[start+i];
+    }
+    return nv;
+}
+
+/*
+    Create vector of vector with sorted tasks 
+*/
+vector<vector<uint32_t>> reform_vm(vector<vector<uint32_t>> vmachines, vector<uint32_t> sorted) {
+    vector<vector<uint32_t>> vm;
+    for(auto i : sorted) {
+        vector<uint32_t> tmp;
+        for(vector<int>::size_type j = 0; j != vmachines.size(); j++)
+            tmp.push_back(vmachines[j][i]);
+        vm.push_back(tmp);
+    }
+    return vm;
+}
+
+int get_cmax_neh(const vector<vector<uint32_t>> vmachines, vector<uint32_t> sorted) {
+  
+  vector<vector<uint32_t>> vm = reform_vm(vmachines, sorted);
+  
+  vector<vector<uint32_t>> base = slice(vm,0,1);
+  vector<vector<uint32_t>> tmp = slice(vm,0,1);
+  vector<vector<uint32_t>> tmp2 = slice(vm,0,1);
+  int glob_min=0;
+  for(int i=1;i<vm.size();i++) {
+    int min=10000000;
+    for(int j=0;j<i+1;j++) {
+      tmp.insert(tmp.begin()+j,vm[i]);
+      int v = get_cmax(tmp);
+      if(min>v) {
+        glob_min=v;
+        min = v;
+        base = tmp;
+      }
+      tmp = tmp2;
+    }
+    tmp2 = base;
+    tmp = base;
+  }
+  return glob_min;
 }
 
 
@@ -109,57 +167,6 @@ vector<uint32_t> sort_tasks(const vector<vector<uint32_t>> &vmachines, const sTa
     return task_index;
 }
 
-vector<vector<uint32_t>> slice(vector<vector<uint32_t>>  v, int start=0, int end=-1) {
-    int oldlen = v.size();
-    int newlen;
-
-    if (end == -1 or end >= oldlen){
-        newlen = oldlen-start;
-    } else {
-        newlen = end-start;
-    }
-
-    vector<vector<uint32_t>> nv(newlen);
-
-    for (int i=0; i<newlen; i++) {
-        nv[i] = v[start+i];
-    }
-    return nv;
-}
-
-int get_cmax_neh(const vector<vector<uint32_t>> vmachines, vector<uint32_t> sorted) {
-  
-  vector<vector<uint32_t>> my_vm;
-  for(auto i : sorted) {
-    vector<uint32_t> tmp;
-    for(vector<int>::size_type j = 0; j != vmachines.size(); j++)
-      tmp.push_back(vmachines[j][i]);
-    my_vm.push_back(tmp);
-  }
-  
-  
-  vector<vector<uint32_t>> base = slice(my_vm,0,1);
-  vector<vector<uint32_t>> tmp = slice(my_vm,0,1);
-  vector<vector<uint32_t>> tmp2 = slice(my_vm,0,1);
-  int glob_min=0;
-  for(int i=1;i<my_vm.size();i++) {
-    int min=10000000;
-    for(int j=0;j<i+1;j++) {
-      tmp.insert(tmp.begin()+j,my_vm[i]);
-      int v = my_get_cmax(tmp);
-      if(min>v) {
-	glob_min=v;
-	min = v;
-	base = tmp;
-      }
-      tmp = tmp2;
-    }
-    tmp2 = base;
-    tmp = base;
-  }
-  return glob_min;
-}
-
 
 int main() {
     vector<vector<uint32_t>> vmachines;
@@ -174,13 +181,11 @@ int main() {
         return -1;
     vector<uint32_t> sorted_tasks(info.number_of_tasks);
     sorted_tasks = sort_tasks(vmachines, info);
-    for (auto i : sorted_tasks)
-        cout << i << " ";
-    cout << endl;
+
     double duration;
     clock_t start = clock();
-    cout << "Cmax for NEH: " << get_cmax_neh(vmachines, sorted_tasks);
+    cout << "Cmax for NEH: " << get_cmax_neh(vmachines, sorted_tasks) << endl;;
     duration = (clock() - start ) / (double) CLOCKS_PER_SEC;
-    cout << "Time: " << duration;
+    cout << "Time: " << duration << endl;
     return 0;
 }
