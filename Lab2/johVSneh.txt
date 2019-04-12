@@ -1,0 +1,7 @@
+25 2 	Tneh: 0,015548s 	Cmax: 395	John: 0s		Cmax: 427
+30 3 	Tneh: 0,015621s 	Cmax: 542	John: 0s		Cmax: 584	
+45 2 	Tneh: 0,062485s 	Cmax: 743	John: 0s		Cmax: 774
+50 3 	Tneh: 0,031242s 	Cmax: 798	John: 0s		Cmax: 898
+200 3 	Tneh: 1,28095		Cmax: 3183	John: 0,015556s		Cmax: 3573
+500 3 	Tneh: inf		Cmax: ???	John: 0,015593s		Cmax: 8761
+2000 3 	Tneh: inf		Cmax: ???	John: 0,1093853s	Cmax: 34361
