@@ -24,21 +24,6 @@ struct sTask
     }
 };
 
-int get_cmax(vector<vector<uint32_t>> vmachines, vector<uint32_t> sorted) {
-    vector<int> sum;
-    for(vector<int>::size_type i = 0; i != vmachines.size(); i++) {
-        sum.push_back(0);
-    }
-    for(vector<int>::size_type i = 0; i != sorted.size(); i++) {
-        sum[0] += vmachines[0][sorted[i]];
-        for(vector<int>::size_type j = 1; j != vmachines.size(); j++) {
-            if(sum[j] < sum[j-1]) sum[j] = sum[j-1];
-            sum[j] += vmachines[j][sorted[i]];
-        }
-    }
-    return sum.back();
-}
-
 int get_cmax(vector<vector<uint32_t>> vmachines) {
     vector<int> sum;
     for(vector<int>::size_type i = 0; i != vmachines[0].size(); i++) {
@@ -86,7 +71,7 @@ vector<vector<uint32_t>> reform_vm(vector<vector<uint32_t>> vmachines, vector<ui
     return vm;
 }
 
-int get_cmax_neh(const vector<vector<uint32_t>> vmachines, vector<uint32_t> sorted) {
+void get_cmax_neh(const vector<vector<uint32_t>> vmachines, vector<uint32_t> sorted) {
   
   vector<vector<uint32_t>> vm = reform_vm(vmachines, sorted);
   
@@ -109,7 +94,13 @@ int get_cmax_neh(const vector<vector<uint32_t>> vmachines, vector<uint32_t> sort
     tmp2 = base;
     tmp = base;
   }
-  return glob_min;
+  for(auto i : base) {
+    for(auto j : i) {
+      cout << j << " ";
+    }
+    cout << endl;
+  }
+  cout << "Cmax for NEH: " << glob_min << endl;
 }
 
 
@@ -154,15 +145,9 @@ vector<uint32_t> sort_tasks(const vector<vector<uint32_t>> &vmachines, const sTa
         task_time[task].time = time_sum;
         task_time[task].index = task;
     }
-    //for (auto i : task_time)
-        //cout << i.index << ",";
     stable_sort(begin(task_time), end(task_time));
-    //for (auto i : task_time)
-        //cout << i.index << ",";
     for (const auto &i : task_time)
         task_index.push_back(i.index);
-    //for (auto i : task_index)
-        //cout << i << ",";
 
     return task_index;
 }
@@ -182,10 +167,6 @@ int main() {
     vector<uint32_t> sorted_tasks(info.number_of_tasks);
     sorted_tasks = sort_tasks(vmachines, info);
 
-    double duration;
-    clock_t start = clock();
-    cout << "Cmax for NEH: " << get_cmax_neh(vmachines, sorted_tasks) << endl;;
-    duration = (clock() - start ) / (double) CLOCKS_PER_SEC;
-    cout << "Time: " << duration << endl;
+    get_cmax_neh(vmachines, sorted_tasks);
     return 0;
 }
